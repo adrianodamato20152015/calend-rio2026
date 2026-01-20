@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário da Equipe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .month-selector button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .month-selector button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .month-year {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .hamburger-btn {
+            width: 60px;
+            height: 60px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .hamburger-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .hamburger-btn.has-selection::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #28a745;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .symbol-menu {
+            position: absolute;
+            top: 70px;
+            right: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: none;
+            z-index: 1000;
+            min-width: 300px;
+        }
+
+        .symbol-menu.active {
+            display: block;
+        }
+
+        .symbol-menu h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .symbol-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .symbol-btn {
+            width: 70px;
+            height: 70px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 2em;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+        }
+
+        .symbol-btn span {
+            font-size: 0.4em;
+            margin-top: 3px;
+            color: #666;
+        }
+
+        .symbol-btn:hover {
+            transform: scale(1.05);
+            border-color: #667eea;
+        }
+
+        .symbol-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .symbol-btn.active span {
+            color: white;
+        }
+
+        .calendar {
+            padding: 30px;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            padding: 15px;
+            font-size: 1.1em;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            position: relative;
+            padding: 10px;
+        }
+
+        .day:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+        }
+
+        .day.other-month {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .day.today {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .day-number {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .day-symbol {
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        .day-time {
+            font-size: 0.8em;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .event-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .event-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #764ba2;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-modal.active {
+            display: flex;
+        }
+
+        .detail-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .legend {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .legend h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+
+        .legend-symbol {
+            font-size: 1.8em;
+            width: 40px;
+            text-align: center;
+        }
+
+        .legend-text {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .status {
+            padding: 10px 30px;
+            text-align: center;
+            background: #d1ecf1;
+            color: #0c5460;
+            font-weight: 500;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .calendar-controls {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .hamburger-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8em;
+            }
+
+            .symbol-menu {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+            }
+
+            .symbol-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+
+            .day-number {
+                font-size: 0.9em;
+            }
+
+            .day-symbol {
+                font-size: 1.3em;
+            }
+
+            .day-time {
+                font-size: 0.7em;
+            }
+
+            .modal-content,
+            .detail-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .legend-items {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Calendário da Equipe</h1>
+            <p>Calendário colaborativo em tempo real</p>
+        </div>
+
+        <div class="status" id="status">
+            Conectando...
+        </div>
+
+        <div class="calendar-controls">
+            <div class="month-selector">
+                <button id="prevMonth">◀</button>
+                <div class="month-year" id="monthYear"></div>
+                <button id="nextMonth">▶</button>
+            </div>
+
+            <div>
+                <button class="hamburger-btn" id="hamburgerBtn">☰</button>
+                <div class="symbol-menu" id="symbolMenu">
+                    <h3>Selecione um símbolo</h3>
+                    <div class="symbol-selector">
+                        <button class="symbol-btn" data-symbol="🏖️" title="Férias">
+                            🏖️
+                            <span>Férias</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="🏠" title="Home Office">
+                            🏠
+                            <span>Home</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="🏢" title="Escritório">
+                            🏢
+                            <span>Escritório</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="🤒" title="Doente">
+                            🤒
+                            <span>Doente</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="✈️" title="Viagem">
+                            ✈️
+                            <span>Viagem</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="📚" title="Treinamento">
+                            📚
+                            <span>Treino</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar">
+            <div class="weekdays">
+                <div class="weekday">Dom</div>
+                <div class="weekday">Seg</div>
+                <div class="weekday">Ter</div>
+                <div class="weekday">Qua</div>
+                <div class="weekday">Qui</div>
+                <div class="weekday">Sex</div>
+                <div class="weekday">Sáb</div>
+            </div>
+            <div class="days" id="calendarDays"></div>
+        </div>
+
+        <div class="legend">
+            <h3>Legenda dos Símbolos</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-symbol">🏖️</div>
+                    <div class="legend-text">Férias</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🏠</div>
+                    <div class="legend-text">Home Office</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🏢</div>
+                    <div class="legend-text">Escritório</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🤒</div>
+                    <div class="legend-text">Doente</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">✈️</div>
+                    <div class="legend-text">Viagem</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">📚</div>
+                    <div class="legend-text">Treinamento</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar evento -->
+    <div class="event-modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Evento</h2>
+                <button class="close-btn" id="closeModal">×</button>
+            </div>
+            <div class="form-group">
+                <label>Data:</label>
+                <input type="text" id="eventDate" readonly>
+            </div>
+            <div class="form-group">
+                <label>Símbolo:</label>
+                <input type="text" id="eventSymbol" readonly>
+            </div>
+            <div class="form-group">
+                <label>Horário:</label>
+                <input type="time" id="eventTime" required>
+            </div>
+            <div class="form-group">
+                <label>Responsável:</label>
+                <input type="text" id="eventResponsible" placeholder="Digite o nome do responsável" required>
+            </div>
+            <div class="form-group">
+                <label>Demanda:</label>
+                <textarea id="eventDemand" placeholder="Descreva a demanda ou atividade" required></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                <button class="btn btn-primary" id="saveBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver detalhes -->
+    <div class="detail-modal" id="detailModal">
+        <div class="detail-content">
+            <div class="modal-header">
+                <h2>Detalhes do Evento</h2>
+                <button class="close-btn" id="closeDetailModal">×</button>
+            </div>
+            <div id="detailContent"></div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="deleteBtn">Excluir</button>
+                <button class="btn btn-secondary" id="closeDetailBtn">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // CONFIGURE SEU FIREBASE AQUI
+        // Vá em https://console.firebase.google.com/
+        // Crie um novo projeto e copie a configuração abaixo
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY_AQUI",
+            authDomain: "seu-projeto.firebaseapp.com",
+            databaseURL: "https://seu-projeto.firebaseio.com",
+            projectId: "seu-projeto",
+            storageBucket: "seu-projeto.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "sua-app-id"
+        };
+
+        // Inicializar Firebase
+        let app, database;
+        try {
+            app = initializeApp(firebaseConfig);
+            database = getDatabase(app);
+            updateStatus('connected', 'Conectado ✓ Sincronização em tempo real ativa');
+        } catch (error) {
+            console.error('Erro ao conectar Firebase:', error);
+            updateStatus('error', 'Modo Local (Configure o Firebase para sincronização)');
+        }
+
+        // Estado da aplicação
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let selectedSymbol = null;
+        let calendarData = {};
+        let currentDateKey = null;
+        let currentEventData = null;
+
+        // Meses em português
+        const monthNames = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+
+        // Controle do menu sanduíche
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const symbolMenu = document.getElementById('symbolMenu');
+        
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            symbolMenu.classList.toggle('active');
+        });
+
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!symbolMenu.contains(e.target) && e.target !== hamburgerBtn) {
+                symbolMenu.classList.remove('active');
+            }
+        });
+
+        // Controle dos modais
+        const eventModal = document.getElementById('eventModal');
+        const detailModal = document.getElementById('detailModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const closeDetailModal = document.getElementById('closeDetailModal');
+        const closeDetailBtn = document.getElementById('closeDetailBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+
+        closeModal.addEventListener('click', () => {
+            eventModal.classList.remove('active');
+            clearForm();
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            eventModal.classList.remove('active');
+            clearForm();
+        });
+
+        closeDetailModal.addEventListener('click', () => {
+            detailModal.classList.remove('active');
+        });
+
+        closeDetailBtn.addEventListener('click', () => {
+            detailModal.classList.remove('active');
+        });
+
+        saveBtn.addEventListener('click', saveEvent);
+        deleteBtn.addEventListener('click', deleteEvent);
+
+        function clearForm() {
+            document.getElementById('eventTime').value = '';
+            document.getElementById('eventResponsible').value = '';
+            document.getElementById('eventDemand').value = '';
+            currentDateKey = null;
+        }
+
+        function formatDate(dateKey) {
+            const [year, month, day] = dateKey.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        // Atualizar status
+        function updateStatus(type, message) {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${type}`;
+            statusEl.textContent = message;
+        }
+
+        // Renderizar calendário
+        function renderCalendar() {
+            const calendarDays = document.getElementById('calendarDays');
+            const monthYear = document.getElementById('monthYear');
+            
+            monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            calendarDays.innerHTML = '';
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+            const today = new Date();
+            const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear;
+
+            // Dias do mês anterior
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                const dayEl = createDayElement(day, true);
+                calendarDays.appendChild(dayEl);
+            }
+
+            // Dias do mês atual
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = isCurrentMonth && day === today.getDate();
+                const dayEl = createDayElement(day, false, isToday);
+                calendarDays.appendChild(dayEl);
+            }
+
+            // Dias do próximo mês
+            const totalCells = calendarDays.children.length;
+            const remainingCells = 42 - totalCells; // 6 semanas x 7 dias
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayEl = createDayElement(day, true);
+                calendarDays.appendChild(dayEl);
+            }
+        }
+
+        // Criar elemento de dia
+        function createDayElement(day, isOtherMonth = false, isToday = false) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'day';
+            if (isOtherMonth) dayEl.classList.add('other-month');
+            if (isToday) dayEl.classList.add('today');
+
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = day;
+
+            const daySymbol = document.createElement('div');
+            daySymbol.className = 'day-symbol';
+
+            const dayTime = document.createElement('div');
+            dayTime.className = 'day-time';
+
+            if (!isOtherMonth) {
+                const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                if (calendarData[dateKey]) {
+                    const eventData = calendarData[dateKey];
+                    daySymbol.textContent = eventData.symbol || '';
+                    dayTime.textContent = eventData.time || '';
+                    
+                    // Clique no símbolo mostra detalhes
+                    daySymbol.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showEventDetails(dateKey, eventData);
+                    });
+                }
+
+                // Clique no dia abre modal para adicionar
+                dayEl.addEventListener('click', () => handleDayClick(dateKey));
+            }
+
+            dayEl.appendChild(dayNumber);
+            dayEl.appendChild(daySymbol);
+            dayEl.appendChild(dayTime);
+
+            return dayEl;
+        }
+
+        // Lidar com clique no dia
+        function handleDayClick(dateKey) {
+            if (!selectedSymbol) {
+                alert('Selecione um símbolo primeiro no menu ☰');
+                return;
+            }
+
+            // Se já existe evento, não abre o modal de criação
+            if (calendarData[dateKey]) {
+                return;
+            }
+
+            currentDateKey = dateKey;
+            document.getElementById('eventDate').value = formatDate(dateKey);
+            document.getElementById('eventSymbol').value = selectedSymbol;
+            eventModal.classList.add('active');
+        }
+
+        // Salvar evento
+        function saveEvent() {
+            const time = document.getElementById('eventTime').value;
+            const responsible = document.getElementById('eventResponsible').value;
+            const demand = document.getElementById('eventDemand').value;
+
+            if (!time || !responsible || !demand) {
+                alert('Preencha todos os campos!');
+                return;
+            }
+
+            const eventData = {
+                symbol: selectedSymbol,
+                time: time,
+                responsible: responsible,
+                demand: demand,
+                createdAt: new Date().toISOString()
+            };
+
+            if (database) {
+                const dateRef = ref(database, `calendar/${currentDateKey}`);
+                set(dateRef, eventData);
+            }
+            
+            calendarData[currentDateKey] = eventData;
+            eventModal.classList.remove('active');
+            clearForm();
+            renderCalendar();
+        }
+
+        // Mostrar detalhes do evento
+        function showEventDetails(dateKey, eventData) {
+            currentEventData = { dateKey, ...eventData };
+            
+            const detailContent = document.getElementById('detailContent');
+            detailContent.innerHTML = `
+                <div class="detail-item">
+                    <strong>Data:</strong>
+                    ${formatDate(dateKey)}
+                </div>
+                <div class="detail-item">
+                    <strong>Símbolo:</strong>
+                    <span style="font-size: 2em;">${eventData.symbol}</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Horário:</strong>
+                    ${eventData.time}
+                </div>
+                <div class="detail-item">
+                    <strong>Responsável:</strong>
+                    ${eventData.responsible}
+                </div>
+                <div class="detail-item">
+                    <strong>Demanda:</strong>
+                    ${eventData.demand}
+                </div>
+            `;
+            
+            detailModal.classList.add('active');
+        }
+
+        // Excluir evento
+        function deleteEvent() {
+            if (!currentEventData) return;
+
+            if (confirm('Deseja realmente excluir este evento?')) {
+                if (database) {
+                    const dateRef = ref(database, `calendar/${currentEventData.dateKey}`);
+                    remove(dateRef);
+                }
+                
+                delete calendarData[currentEventData.dateKey];
+                detailModal.classList.remove('active');
+                currentEventData = null;
+                renderCalendar();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        });
+
+        // Seleção de símbolos
+        document.querySelectorAll('.symbol-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.symbol-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSymbol = btn.dataset.symbol;
+                symbolMenu.classList.remove('active');
+                
+                // Adicionar indicador visual no botão hamburger
+                hamburgerBtn.classList.add('has-selection');
+            });
+        });
+
+        // Sincronizar com Firebase
+        if (database) {
+            const calendarRef = ref(database, 'calendar');
+            onValue(calendarRef, (snapshot) => {
+                calendarData = snapshot.val() || {};
+                renderCalendar();
+            });
+        }
+
+        // Renderizar calendário inicial
+        renderCalendar();
+
+        // Selecionar primeiro símbolo por padrão
+        // document.querySelector('.symbol-btn').click();
+    </script>
+</body>
+</html>
