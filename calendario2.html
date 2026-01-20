@@ -221,7 +221,7 @@
             background: white;
             position: relative;
             padding: 10px;
-            padding-top: 30px;
+            padding-top: 30px; /* Espaço para day-number e moon-phase posicionados absolute */
         }
 
         .day:hover {
@@ -779,6 +779,7 @@
         function getMoonPhase(year, month, day) {
             // Algoritmo simplificado para calcular a fase da lua
             // Baseado no ciclo lunar de aproximadamente 29.53 dias
+            // NOTA: Esta é uma aproximação e pode ter variações de ~1 dia
             const date = new Date(year, month, day);
             
             // Data de referência de lua nova conhecida: 6 de janeiro de 2000
@@ -791,23 +792,21 @@
             // Ciclo lunar médio em dias
             const lunarCycle = 29.53058867;
             
-            // Calcular a fase atual
+            // Calcular a fase atual (0-29.53)
             const phase = diffDays % lunarCycle;
             
             // Retornar emoji baseado na fase
-            // 0-2: Lua Nova, 5-9: Quarto Crescente, 13-16: Lua Cheia, 20-24: Quarto Minguante
-            if (phase < 2 || phase > 27.5) {
-                return '🌑'; // Lua Nova (preta)
-            } else if (phase >= 5 && phase < 9) {
-                return '🌓'; // Quarto Crescente
-            } else if (phase >= 13 && phase < 16) {
-                return '🌕'; // Lua Cheia (branca)
-            } else if (phase >= 20 && phase < 24) {
-                return '🌗'; // Quarto Minguante
-            } else if (phase >= 2 && phase < 13) {
-                return '🌓'; // Crescente
+            // Dividindo o ciclo em 4 fases principais
+            if (phase < 1.84) {
+                return '🌑'; // Lua Nova (0-1.84 dias)
+            } else if (phase < 7.38) {
+                return '🌓'; // Quarto Crescente (1.84-7.38 dias)
+            } else if (phase < 14.77) {
+                return '🌕'; // Lua Cheia (7.38-14.77 dias)
+            } else if (phase < 22.15) {
+                return '🌗'; // Quarto Minguante (14.77-22.15 dias)
             } else {
-                return '🌗'; // Minguante
+                return '🌑'; // De volta à Lua Nova (22.15-29.53 dias)
             }
         }
 
