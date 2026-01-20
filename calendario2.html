@@ -796,17 +796,17 @@
             const phase = diffDays % lunarCycle;
             
             // Retornar emoji baseado na fase
-            // Dividindo o ciclo em 4 fases principais
-            if (phase < 1.84) {
-                return '🌑'; // Lua Nova (0-1.84 dias)
-            } else if (phase < 7.38) {
-                return '🌓'; // Quarto Crescente (1.84-7.38 dias)
-            } else if (phase < 14.77) {
-                return '🌕'; // Lua Cheia (7.38-14.77 dias)
-            } else if (phase < 22.15) {
-                return '🌗'; // Quarto Minguante (14.77-22.15 dias)
+            // Fases principais: Lua Nova (~0), Crescente (~7.4), Cheia (~14.8), Minguante (~22.1)
+            if (phase < 3.69) {
+                return '🌑'; // Lua Nova (0-3.69 dias)
+            } else if (phase < 11.07) {
+                return '🌓'; // Quarto Crescente (3.69-11.07 dias)
+            } else if (phase < 18.46) {
+                return '🌕'; // Lua Cheia (11.07-18.46 dias)
+            } else if (phase < 25.84) {
+                return '🌗'; // Quarto Minguante (18.46-25.84 dias)
             } else {
-                return '🌑'; // De volta à Lua Nova (22.15-29.53 dias)
+                return '🌑'; // De volta à Lua Nova (25.84-29.53 dias)
             }
         }
 
