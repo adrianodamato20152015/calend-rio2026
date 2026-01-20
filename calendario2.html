@@ -141,7 +141,7 @@
 
         .symbol-selector {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
 
@@ -215,12 +215,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             cursor: pointer;
             transition: all 0.3s;
             background: white;
             position: relative;
             padding: 10px;
+            padding-top: 30px; /* Espaço para day-number e moon-phase posicionados absolute */
         }
 
         .day:hover {
@@ -243,7 +244,9 @@
             font-weight: bold;
             font-size: 1.2em;
             color: #333;
-            margin-bottom: 5px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
         }
 
         .day-symbol {
@@ -256,6 +259,15 @@
             color: #667eea;
             font-weight: 600;
             margin-top: 2px;
+        }
+
+        .moon-phase {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            opacity: 0.5;
+            font-size: 0.9em;
+            pointer-events: none;
         }
 
         .event-modal {
@@ -590,6 +602,22 @@
                             📚
                             <span>Treino</span>
                         </button>
+                        <button class="symbol-btn" data-symbol="🦭" title="Monitoramento">
+                            🦭
+                            <span>Monitor.</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="🚫🚗" title="Veículos Proibidos">
+                            🚫🚗
+                            <span>Veíc.Prob</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="⛵" title="Incursão Delta">
+                            ⛵
+                            <span>Inc.Delta</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="🚤" title="Incursão Timonha">
+                            🚤
+                            <span>Inc.Tim.</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -634,6 +662,22 @@
                 <div class="legend-item">
                     <div class="legend-symbol">📚</div>
                     <div class="legend-text">Treinamento</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🦭</div>
+                    <div class="legend-text">Monitoramento</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🚫🚗</div>
+                    <div class="legend-text">Veículos Proibidos</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">⛵</div>
+                    <div class="legend-text">Incursão Delta</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🚤</div>
+                    <div class="legend-text">Incursão Timonha</div>
                 </div>
             </div>
         </div>
@@ -730,6 +774,41 @@
             'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
         ];
+
+        // Calcular fase da lua
+        function getMoonPhase(year, month, day) {
+            // Algoritmo simplificado para calcular a fase da lua
+            // Baseado no ciclo lunar de aproximadamente 29.53 dias
+            // NOTA: Esta é uma aproximação e pode ter variações de ~1 dia
+            const date = new Date(year, month, day);
+            
+            // Data de referência de lua nova conhecida: 6 de janeiro de 2000
+            const knownNewMoon = new Date(2000, 0, 6, 18, 14);
+            
+            // Diferença em dias
+            const diffTime = date.getTime() - knownNewMoon.getTime();
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+            
+            // Ciclo lunar médio em dias
+            const lunarCycle = 29.53058867;
+            
+            // Calcular a fase atual (0-29.53)
+            const phase = diffDays % lunarCycle;
+            
+            // Retornar emoji baseado na fase
+            // Fases principais: Lua Nova (~0), Crescente (~7.4), Cheia (~14.8), Minguante (~22.1)
+            if (phase < 3.69) {
+                return '🌑'; // Lua Nova (0-3.69 dias)
+            } else if (phase < 11.07) {
+                return '🌓'; // Quarto Crescente (3.69-11.07 dias)
+            } else if (phase < 18.46) {
+                return '🌕'; // Lua Cheia (11.07-18.46 dias)
+            } else if (phase < 25.84) {
+                return '🌗'; // Quarto Minguante (18.46-25.84 dias)
+            } else {
+                return '🌑'; // De volta à Lua Nova (25.84-29.53 dias)
+            }
+        }
 
         // Controle do menu sanduíche
         const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -852,6 +931,14 @@
             const dayTime = document.createElement('div');
             dayTime.className = 'day-time';
 
+            // Adicionar fase da lua
+            const moonPhase = document.createElement('div');
+            moonPhase.className = 'moon-phase';
+            if (!isOtherMonth) {
+                const moonEmoji = getMoonPhase(currentYear, currentMonth, day);
+                moonPhase.textContent = moonEmoji;
+            }
+
             if (!isOtherMonth) {
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
@@ -872,6 +959,7 @@
             }
 
             dayEl.appendChild(dayNumber);
+            dayEl.appendChild(moonPhase);
             dayEl.appendChild(daySymbol);
             dayEl.appendChild(dayTime);
 
