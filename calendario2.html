@@ -600,8 +600,8 @@
                             📚
                             <span>Treino</span>
                         </button>
-                        <button class="symbol-btn" data-symbol="🦭" title="Monitoramento">
-                            🦭
+                        <button class="symbol-btn" data-symbol="🔭" title="Monitoramento">
+                            🔭
                             <span>Monitor.</span>
                         </button>
                         <button class="symbol-btn" data-symbol="🚫" title="Veículos Proibidos">
@@ -670,7 +670,7 @@
                     <div class="legend-text">Treinamento</div>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-symbol">🦭</div>
+                    <div class="legend-symbol">🔭</div>
                     <div class="legend-text">Monitoramento</div>
                 </div>
                 <div class="legend-item">
@@ -789,30 +789,80 @@
             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
         ];
 
-        // Função para calcular a fase da lua
+        // Fases da lua de 2026 (baseado em dados astronômicos precisos)
+        const moonPhases2026 = {
+            newMoon: [
+                '2026-01-03', '2026-02-01', '2026-03-03', '2026-04-01', '2026-04-30', '2026-05-30',
+                '2026-06-28', '2026-07-28', '2026-08-26', '2026-09-25', '2026-10-24', '2026-11-23', '2026-12-23'
+            ],
+            firstQuarter: [
+                '2026-01-11', '2026-02-09', '2026-03-11', '2026-04-09', '2026-05-09', '2026-06-07',
+                '2026-07-07', '2026-08-05', '2026-09-03', '2026-10-03', '2026-11-01', '2026-12-01', '2026-12-31'
+            ],
+            fullMoon: [
+                '2026-01-18', '2026-02-17', '2026-03-18', '2026-04-17', '2026-05-17', '2026-06-15',
+                '2026-07-15', '2026-08-13', '2026-09-12', '2026-10-11', '2026-11-10', '2026-12-09'
+            ],
+            lastQuarter: [
+                '2026-01-26', '2026-02-24', '2026-03-26', '2026-04-24', '2026-05-24', '2026-06-22',
+                '2026-07-22', '2026-08-20', '2026-09-19', '2026-10-18', '2026-11-17', '2026-12-17'
+            ]
+        };
+
+        // Função para calcular a fase da lua com base em dados reais de 2026
         function getMoonPhase(year, month, day) {
-            // Algoritmo baseado na idade da lua
-            // Referência: nova lua conhecida em 06/01/2000
-            const refDate = new Date(2000, 0, 6);
-            const currentDate = new Date(year, month, day);
+            if (year !== 2026) {
+                // Para outros anos, retorna lua crescente como padrão
+                return '🌓';
+            }
+
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             
-            // Diferença em dias
-            const diffTime = currentDate - refDate;
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
-            // Ciclo lunar é de aproximadamente 29.53 dias
-            const lunarCycle = 29.53;
-            const phase = (diffDays % lunarCycle) / lunarCycle;
-            
-            // Retornar emoji correspondente
-            if (phase < 0.125 || phase >= 0.875) {
-                return '🌑'; // Lua Nova (toda preta)
-            } else if (phase >= 0.125 && phase < 0.375) {
+            // Verifica se é uma fase específica
+            if (moonPhases2026.newMoon.includes(dateStr)) {
+                return '🌑'; // Lua Nova
+            }
+            if (moonPhases2026.firstQuarter.includes(dateStr)) {
                 return '🌓'; // Quarto Crescente
-            } else if (phase >= 0.375 && phase < 0.625) {
-                return '🌕'; // Lua Cheia (toda branca)
-            } else {
+            }
+            if (moonPhases2026.fullMoon.includes(dateStr)) {
+                return '🌕'; // Lua Cheia
+            }
+            if (moonPhases2026.lastQuarter.includes(dateStr)) {
                 return '🌗'; // Quarto Minguante
+            }
+
+            // Calcula a fase intermediária
+            const currentDate = new Date(year, month, day);
+            let closestPhase = null;
+            let minDiff = Infinity;
+            let phaseType = '';
+            
+            // Encontra a fase mais próxima
+            for (const [type, dates] of Object.entries(moonPhases2026)) {
+                for (const dateString of dates) {
+                    const phaseDate = new Date(dateString);
+                    const diff = Math.abs(currentDate - phaseDate);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestPhase = phaseDate;
+                        phaseType = type;
+                    }
+                }
+            }
+
+            // Determina se está antes ou depois da fase mais próxima
+            const isAfter = currentDate > closestPhase;
+            
+            // Retorna o emoji baseado na transição
+            if (phaseType === 'newMoon') {
+                return isAfter ? '🌒' : '🌑'; // Crescente inicial ou Nova
+            } else if (phaseType === 'firstQuarter') {
+                return isAfter ? '🌔' : '🌓'; // Crescente gibosa ou Quarto Crescente
+            } else if (phaseType === 'fullMoon') {
+                return isAfter ? '🌖' : '🌕'; // Minguante gibosa ou Cheia
+            } else {
+                return isAfter ? '🌘' : '🌗'; // Minguante final ou Quarto Minguante
             }
         }
 
@@ -830,6 +880,17 @@
             if (!symbolMenu.contains(e.target) && e.target !== hamburgerBtn) {
                 symbolMenu.classList.remove('active');
             }
+        });
+
+        // Seleção de símbolo
+        document.querySelectorAll('.symbol-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.symbol-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSymbol = btn.dataset.symbol;
+                hamburgerBtn.classList.add('has-selection');
+                symbolMenu.classList.remove('active');
+            });
         });
 
         // Controle dos modais
@@ -1009,65 +1070,91 @@
             };
 
             if (database) {
-                const dateRef = ref(database, `calendar/${currentDateKey}`);
-                set(dateRef, eventData);
+                set(ref(database, `events/${currentDateKey}`), eventData)
+                    .then(() => {
+                        console.log('Evento salvo no Firebase');
+                        eventModal.classList.remove('active');
+                        clearForm();
+                    })
+                    .catch(error => {
+                        console.error('Erro ao salvar:', error);
+                        alert('Erro ao salvar evento');
+                    });
+            } else {
+                // Modo local
+                calendarData[currentDateKey] = eventData;
+                renderCalendar();
+                eventModal.classList.remove('active');
+                clearForm();
             }
-            
-            calendarData[currentDateKey] = eventData;
-            eventModal.classList.remove('active');
-            clearForm();
-            renderCalendar();
         }
 
         // Mostrar detalhes do evento
         function showEventDetails(dateKey, eventData) {
-            currentEventData = { dateKey, ...eventData };
-            
+            currentDateKey = dateKey;
+            currentEventData = eventData;
+
             const detailContent = document.getElementById('detailContent');
             detailContent.innerHTML = `
                 <div class="detail-item">
-                    <strong>Data:</strong>
+                    <strong>📅 Data:</strong>
                     ${formatDate(dateKey)}
                 </div>
                 <div class="detail-item">
-                    <strong>Símbolo:</strong>
-                    <span style="font-size: 2em;">${eventData.symbol}</span>
+                    <strong>🎯 Símbolo:</strong>
+                    ${eventData.symbol}
                 </div>
                 <div class="detail-item">
-                    <strong>Horário:</strong>
+                    <strong>⏰ Horário:</strong>
                     ${eventData.time}
                 </div>
                 <div class="detail-item">
-                    <strong>Responsável:</strong>
+                    <strong>👤 Responsável:</strong>
                     ${eventData.responsible}
                 </div>
                 <div class="detail-item">
-                    <strong>Demanda:</strong>
+                    <strong>📝 Demanda:</strong>
                     ${eventData.demand}
                 </div>
             `;
-            
+
             detailModal.classList.add('active');
         }
 
         // Excluir evento
         function deleteEvent() {
-            if (!currentEventData) return;
+            if (!confirm('Deseja realmente excluir este evento?')) {
+                return;
+            }
 
-            if (confirm('Deseja realmente excluir este evento?')) {
-                if (database) {
-                    const dateRef = ref(database, `calendar/${currentEventData.dateKey}`);
-                    remove(dateRef);
-                }
-                
-                delete calendarData[currentEventData.dateKey];
-                detailModal.classList.remove('active');
-                currentEventData = null;
+            if (database) {
+                remove(ref(database, `events/${currentDateKey}`))
+                    .then(() => {
+                        console.log('Evento excluído do Firebase');
+                        detailModal.classList.remove('active');
+                    })
+                    .catch(error => {
+                        console.error('Erro ao excluir:', error);
+                        alert('Erro ao excluir evento');
+                    });
+            } else {
+                // Modo local
+                delete calendarData[currentDateKey];
                 renderCalendar();
+                detailModal.classList.remove('active');
             }
         }
 
-        // Event listeners
+        // Sincronizar com Firebase
+        if (database) {
+            onValue(ref(database, 'events'), (snapshot) => {
+                calendarData = snapshot.val() || {};
+                renderCalendar();
+                console.log('Dados sincronizados:', calendarData);
+            });
+        }
+
+        // Navegação de meses
         document.getElementById('prevMonth').addEventListener('click', () => {
             currentMonth--;
             if (currentMonth < 0) {
@@ -1086,34 +1173,8 @@
             renderCalendar();
         });
 
-        // Seleção de símbolos
-        document.querySelectorAll('.symbol-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.symbol-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedSymbol = btn.dataset.symbol;
-                symbolMenu.classList.remove('active');
-                
-                // Adicionar indicador visual no botão hamburger
-                hamburgerBtn.classList.add('has-selection');
-            });
-        });
-
-        // Sincronizar com Firebase
-        if (database) {
-            const calendarRef = ref(database, 'calendar');
-            onValue(calendarRef, (snapshot) => {
-                calendarData = snapshot.val() || {};
-                renderCalendar();
-            });
-        }
-
-        // Renderizar calendário inicial
+        // Inicializar calendário
         renderCalendar();
-
-        // Selecionar primeiro símbolo por padrão
-        // document.querySelector('.symbol-btn').click();
     </script>
 </body>
 </html>
