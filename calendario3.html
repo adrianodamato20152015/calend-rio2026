@@ -1,0 +1,75 @@
+        // Fases da lua de 2026 CORRETAS (baseado em dados astronômicos)
+        const moonPhases2026 = {
+            fullMoon: [
+                '2026-01-03', '2026-02-01', '2026-03-03', '2026-04-01', '2026-05-01', '2026-05-31',
+                '2026-06-29', '2026-07-29', '2026-08-28', '2026-09-26', '2026-10-25', '2026-11-23', '2026-12-23'
+            ],
+            lastQuarter: [
+                '2026-01-10', '2026-02-09', '2026-03-11', '2026-04-10', '2026-05-09', '2026-06-08',
+                '2026-07-07', '2026-08-05', '2026-09-04', '2026-10-03', '2026-11-01', '2026-12-01', '2026-12-30'
+            ],
+            newMoon: [
+                '2026-01-18', '2026-02-17', '2026-03-18', '2026-04-17', '2026-05-16', '2026-06-14',
+                '2026-07-14', '2026-08-12', '2026-09-11', '2026-10-10', '2026-11-09', '2026-12-08'
+            ],
+            firstQuarter: [
+                '2026-01-26', '2026-02-24', '2026-03-25', '2026-04-23', '2026-05-23', '2026-06-21',
+                '2026-07-22', '2026-08-19', '2026-09-18', '2026-10-17', '2026-11-16', '2026-12-15'
+            ]
+        };
+
+        // Função para calcular a fase da lua com dados reais de 2026
+        function getMoonPhase(year, month, day) {
+            if (year !== 2026) {
+                return '🌓'; // Para outros anos, retorna padrão
+            }
+
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            // Verifica se é uma fase específica
+            if (moonPhases2026.newMoon.includes(dateStr)) {
+                return '🌑'; // Lua Nova
+            }
+            if (moonPhases2026.firstQuarter.includes(dateStr)) {
+                return '🌓'; // Quarto Crescente
+            }
+            if (moonPhases2026.fullMoon.includes(dateStr)) {
+                return '🌕'; // Lua Cheia
+            }
+            if (moonPhases2026.lastQuarter.includes(dateStr)) {
+                return '🌗'; // Quarto Minguante
+            }
+
+            // Calcula a fase intermediária
+            const currentDate = new Date(year, month, day);
+            let closestPhase = null;
+            let minDiff = Infinity;
+            let phaseType = '';
+            
+            // Encontra a fase mais próxima
+            for (const [type, dates] of Object.entries(moonPhases2026)) {
+                for (const dateString of dates) {
+                    const phaseDate = new Date(dateString);
+                    const diff = Math.abs(currentDate - phaseDate);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestPhase = phaseDate;
+                        phaseType = type;
+                    }
+                }
+            }
+
+            // Determina se está antes ou depois da fase mais próxima
+            const isAfter = currentDate > closestPhase;
+            
+            // Retorna o emoji baseado na transição
+            if (phaseType === 'newMoon') {
+                return isAfter ? '🌒' : '🌘'; // Crescente inicial ou Minguante final
+            } else if (phaseType === 'firstQuarter') {
+                return isAfter ? '🌔' : '🌒'; // Crescente gibosa ou Crescente inicial
+            } else if (phaseType === 'fullMoon') {
+                return isAfter ? '🌖' : '🌔'; // Minguante gibosa ou Crescente gibosa
+            } else {
+                return isAfter ? '🌘' : '🌖'; // Minguante final ou Minguante gibosa
+            }
+        }
