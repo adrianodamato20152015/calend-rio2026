@@ -141,7 +141,7 @@
 
         .symbol-selector {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
 
@@ -243,7 +243,9 @@
             font-weight: bold;
             font-size: 1.2em;
             color: #333;
-            margin-bottom: 5px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
         }
 
         .day-symbol {
@@ -256,6 +258,14 @@
             color: #667eea;
             font-weight: 600;
             margin-top: 2px;
+        }
+
+        .moon-phase {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            opacity: 0.5;
+            font-size: 0.9em;
         }
 
         .event-modal {
@@ -590,6 +600,30 @@
                             📚
                             <span>Treino</span>
                         </button>
+                        <button class="symbol-btn" data-symbol="🦭" title="Monitoramento">
+                            🦭
+                            <span>Monitor.</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="🚫" title="Veículos Proibidos">
+                            🚫
+                            <span>Veíc.Proib</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="🚤" title="Incursão Delta">
+                            🚤
+                            <span>Inc.Delta</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="⛵" title="Incursão Timonha">
+                            ⛵
+                            <span>Inc.Timon</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="🎓" title="Palestra">
+                            🎓
+                            <span>Palestra</span>
+                        </button>
+                        <button class="symbol-btn" data-symbol="👮" title="Fiscalização">
+                            👮
+                            <span>Fiscaliz.</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -634,6 +668,30 @@
                 <div class="legend-item">
                     <div class="legend-symbol">📚</div>
                     <div class="legend-text">Treinamento</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🦭</div>
+                    <div class="legend-text">Monitoramento</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🚫</div>
+                    <div class="legend-text">Veículos Proibidos</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🚤</div>
+                    <div class="legend-text">Incursão Delta</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">⛵</div>
+                    <div class="legend-text">Incursão Timonha</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">🎓</div>
+                    <div class="legend-text">Palestra</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol">👮</div>
+                    <div class="legend-text">Fiscalização</div>
                 </div>
             </div>
         </div>
@@ -730,6 +788,33 @@
             'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
         ];
+
+        // Função para calcular a fase da lua
+        function getMoonPhase(year, month, day) {
+            // Algoritmo baseado na idade da lua
+            // Referência: nova lua conhecida em 06/01/2000
+            const refDate = new Date(2000, 0, 6);
+            const currentDate = new Date(year, month, day);
+            
+            // Diferença em dias
+            const diffTime = currentDate - refDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            // Ciclo lunar é de aproximadamente 29.53 dias
+            const lunarCycle = 29.53;
+            const phase = (diffDays % lunarCycle) / lunarCycle;
+            
+            // Retornar emoji correspondente
+            if (phase < 0.125 || phase >= 0.875) {
+                return '🌑'; // Lua Nova (toda preta)
+            } else if (phase >= 0.125 && phase < 0.375) {
+                return '🌓'; // Quarto Crescente
+            } else if (phase >= 0.375 && phase < 0.625) {
+                return '🌕'; // Lua Cheia (toda branca)
+            } else {
+                return '🌗'; // Quarto Minguante
+            }
+        }
 
         // Controle do menu sanduíche
         const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -852,6 +937,13 @@
             const dayTime = document.createElement('div');
             dayTime.className = 'day-time';
 
+            // Adicionar fase da lua
+            const moonPhase = document.createElement('div');
+            moonPhase.className = 'moon-phase';
+            if (!isOtherMonth) {
+                moonPhase.textContent = getMoonPhase(currentYear, currentMonth, day);
+            }
+
             if (!isOtherMonth) {
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
@@ -872,6 +964,7 @@
             }
 
             dayEl.appendChild(dayNumber);
+            dayEl.appendChild(moonPhase);
             dayEl.appendChild(daySymbol);
             dayEl.appendChild(dayTime);
 
